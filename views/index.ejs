@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+  <!-- ヘッダ -->
+  <section class="container">
+    <div class="row">
+      <div class="col-xs-4">広告</div>
+      <div class="col-xs-4">広告</div>
+      <div class="col-xs-4">データは2014シリーズ第3弾</div>
+    </div>
+  </section>
+
+  <!-- ヘッダ -->
+  <section class="container">
+    <div class="row">
+      <div class="col-xs-2">lane</div>
+      <div class="col-xs-2">prevprev</div>
+      <div class="col-xs-2">prev</div>
+      <div class="col-xs-2">now</div>
+      <div class="col-xs-2 bg-primary">next</div>
+      <div class="col-xs-2 bg-primary">nextnext</div>
+    </div>
+  </section>
+
+  <!-- 神託 A B -->
+  <!-- TODO: たくさんある場合はアコーディオン -->
+  <section id="oracleTableA" class="container">
+  </section>
+  <section id="oracleTableB" class="container">
+  </section>
+
+  <!-- 入力 A B -->
+  <section class="container">
+    <div class="row">
+      <div class="col-xs-3">小さいイラスト予定地</div>
+      <div class="col-xs-1">A</div>
+      <div id="inputInfoA" class="col-xs-2" style="color: gray">1から9は0をつけて</div>
+      <div class="col-xs-6">
+        <form class="form-inline" role="form">
+          <div class="checkbox">
+            <label>
+              <input id="isCPA" type="checkbox" value="">CP?
+            </label>
+          </div>
+          <div class="checkbox">
+            <label>
+              <input id="isReverseA" type="checkbox" value="">reverse
+            </label>
+          </div>
+          <input id="cardNoA" type="text" class="form-control" placeholder="00"/>
+          <button id="pushButtonA" type="button" class="btn btn-default">push</button>
+          <button id="popButtonA" type="button" class="btn btn-default">pop</button>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-2">historyA</div>
+        <div class="col-xs-10" id="historyA"></div>
+    </div>
+    <div class="row">
+      <div class="col-xs-3">小さいイラスト予定地2</div>
+      <div class="col-xs-1">B</div>
+      <div id="inputInfoB" class="col-xs-2" style="color: gray">1から9は0をつけて</div>
+      <div class="col-xs-6">
+        <form class="form-inline" role="form">
+          <div class="checkbox">
+            <label>
+              <input id="isCPB" type="checkbox" value="">CP?
+            </label>
+          </div>
+          <div class="checkbox">
+            <label>
+              <input id="isReverseB" type="checkbox" value="">reverse
+            </label>
+          </div>
+          <input id="cardNoB" type="text" class="form-control" placeholder="00"/>
+          <button id="pushButtonB" type="button" class="btn btn-default">push</button>
+          <button id="popButtonB" type="button" class="btn btn-default">pop</button>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-2">historyB</div>
+        <div class="col-xs-10" id="historyB"></div>
+    </div>
+  </section>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+        $(function() {
+            // 反転チェックボックスの前回値
+            var reversePre = {A: false, B: false};
+            // CP の扱いが検索と履歴表示で違うため、別々に定義
+            var searchCards = {A: [], B: []};
+            var historyCards = {A: [], B: []};
+
+            $('[id*=Button]').click(function() {
+                // 反転する？
+                var doReverse = false;
+                // 動作の決定
+                var isPop = /^pop/.test($(this).attr('id'));
+                // スロットの決定
+                var mySlot = 'B';
+                if (/A$/.test($(this).attr('id'))) {
+                    mySlot = 'A';
+                }
+                if (isPop) {
+                    $('#inputInfo' + mySlot).css('color', 'gray');
+                    searchCards[mySlot].pop();
+                    historyCards[mySlot].pop();
+                } else {
+                    if ($('#cardNo' + mySlot).val().length == 0) {
+                        $('#inputInfo' + mySlot).css('color', 'gray');
+                        return;
+                    }
+                    if (!/^[0-9]{2}$/.test($('#cardNo' + mySlot).val())) {
+                        $('#inputInfo' + mySlot).css('color', 'red');
+                        return;
+                    } else {
+                        $('#inputInfo' + mySlot).css('color', 'gray');
+                    }
+                    if ($('#isCP' + mySlot).prop('checked')) {
+                        searchCards[mySlot].push('C' + parseInt($('#cardNo' + mySlot).val(), 10).toString(16).toUpperCase());
+                        historyCards[mySlot].push('CP' + $('#cardNo' + mySlot).val());
+                    } else {
+                        searchCards[mySlot].push($('#cardNo' + mySlot).val());
+                        historyCards[mySlot].push($('#cardNo' + mySlot).val());
+                    }
+                }
+                $('#history' + mySlot).text(historyCards[mySlot].join(','));
+                if (searchCards[mySlot].length == 0) {
+                    $('#oracleTable' + mySlot).empty();
+                    $('#cardNo' + mySlot).val(null);
+                    return;
+                }
+                // 反転チェックボックスの値が前回値と違う場合、反転を行う
+                doReverse = $('#isReverse' + mySlot).prop('checked') != reversePre[mySlot];
+                // 反転チェックボックスの前回値保存
+                reversePre[mySlot] = $('#isReverse' + mySlot).prop('checked');
+                $.ajax({
+                    url: '/pushPop',
+                    dataType: 'json',
+                    data: {
+                        slot: mySlot,
+                        cardNos: searchCards[mySlot].join(','),
+                        doReverse: doReverse,
+                        isReverse: $('#isReverse' + mySlot).prop('checked')
+                    },
+                    type: 'POST',
+                    success: function(data) {
+                        $('#oracleTable' + mySlot).empty();
+                        if (data.oracles.length != 0) {
+                            $('#cardNo' + mySlot).val(null);
+                        }
+                        data.oracles.forEach(function(oracle) {
+                            var oracleRows = [];
+                            var cardCount = 0;
+                            oracleRows.push('<div class="row">');
+                            oracleRows.push('<div class="col-xs-2">' + oracle.lane +'</div>');
+                            oracle.cards.forEach(function(card) {
+                                var cellColor = '';
+                                oracleRows.push('<div class="col-xs-1">' + card.index + '</div>');
+                                if (cardCount < 3) {
+                                    oracleRows.push('<div class="col-xs-1">' + card.no + '</div>');
+                                } else {
+                                    // next と nextnext のみセルに色をつける
+                                    if (card.rarity == 'PR' || card.rarity == 'CP') {
+                                        cellColor = 'danger';
+                                    } else if (card.rarity == 'R') {
+                                        cellColor = 'warning';
+                                    } else if (card.rarity == 'N') {
+                                        cellColor = 'info';
+                                    }
+                                    oracleRows.push('<div class="col-xs-1 bg-' + cellColor + '">' + card.no + '</div>');
+                                }
+                                cardCount++;
+                            });
+                            oracleRows.push('</div>');
+                            $('#oracleTable' + mySlot).append(oracleRows.join(''));
+                        });
+                    }
+                });
+            });
+        });
+        $(document).ready(function() {
+        });
+    </script>
+  </body>
+</html>
